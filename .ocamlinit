@@ -1,0 +1,8 @@
+#mod_use "debug.ml";;
+#mod_use "helper.ml";;
+#mod_use "tree.ml";;
+#mod_use "parser.ml";;
+#mod_use "lexer.ml";;
+#mod_use "knowledge.ml";;
+#mod_use "checked_narration.ml";;
+#use "repl.ml";;
