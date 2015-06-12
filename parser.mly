@@ -34,7 +34,7 @@ let exist_in_tables e =
 let add_private e =
 	match exist_in_tables e with
 	| None -> Hashtbl.add name_table e Private
-	| Name -> Hashtbl.replace name_table e Private
+	| Name -> if Hashtbl.find name_table e = Private || Hashtbl.find name_table e = Public then Hashtbl.replace name_table e Private
 	| Agent | Both -> Hashtbl.replace name_table e Private
 
 let add_public e =
@@ -42,9 +42,19 @@ let add_public e =
 	| None | Agent -> Hashtbl.add name_table e Public
 	| Name | Both -> ()
 
+let add_generated e a =
+	match exist_in_tables e with
+	| None -> Hashtbl.add name_table e (Generated a)
+	| Name -> if Hashtbl.find name_table e = Private || Hashtbl.find name_table e = Public then failwith (e ^ " cannot be generated due to previous declaration.")
+	| Agent | Both -> failwith (e ^ " cannot be generated due to being an agent.")
+
 let add_agent a =
 	match exist_in_tables a with
-	| None | Name -> Hashtbl.add agent_table a (Hashtbl.create 10); add_public a
+	| None | Name ->
+		begin try
+			if Hashtbl.find name_table a <> Private && Hashtbl.find name_table a <> Public then failwith (a ^ " cannot be an agent due to being generated.")
+		with Not_found -> () end;
+		Hashtbl.add agent_table a (Hashtbl.create 10); add_public a
 	| Agent | Both -> ()
 
 let representation_n = ref 0
@@ -104,20 +114,29 @@ optional_sep:
 	|      {}
 
 equation:
-	| term optional_newline EQUAL optional_newline term { term_function_iter (add_function ~warning:true) $1; term_function_iter add_function $5; Some (Equation ($1, $5)) }
-	| IDENT SLASH INTEGER  { add_function $1 $3; None }
+	| term optional_newline EQUAL optional_newline term 
+		{
+			let function_definitions term =
+				let add_definition func arity acc =
+					let result = if Hashtbl.mem signature_table func then acc else FunctionSymbol (func, arity) :: acc in
+					add_function ~warning:true func arity;
+					result in
+				term_function_fold add_definition [] term in
+			Equation ($1, $5) ::	(function_definitions $5) @ (function_definitions $1)
+		}
+	| IDENT SLASH INTEGER  { add_function $1 $3; [FunctionSymbol ($1, $3)] }
 	/* | error SEPARATOR { print_string "It was not that bad.."; Equation (Variable "x", Variable "y") }*/
 
 equationlist:
-	| equationlist sep equation  { match $3 with Some e -> e :: $1 | None -> $1 }
-	| equation                   { match $1 with Some e -> [e] | None -> [] }
+	| equationlist sep equation  { $3 @ $1 }
+	| equation                   { $1 }
 
 agentlist:
 	| IDENT COMMA agentlist  { $1 :: $3 }
 	| IDENT                  { [$1] }
 
 declaration:
-	| IDENT GENERATES IDENT  { add_agent $1; add_private $3; Hashtbl.add (Hashtbl.find agent_table $1) (Variable $3) (Variable $3) }
+	| IDENT GENERATES IDENT  { add_agent $1; add_generated $3 $1; Hashtbl.add (Hashtbl.find agent_table $1) (Variable $3) (Variable $3) }
 	| PRIVATE IDENT          { add_private $2 }
 	| agentlist KNOW term    { term_function_iter check_function $3; term_variable_iter add_public $3; List.iter (fun a -> add_agent a; Hashtbl.add (Hashtbl.find agent_table a) $3 $3) $1 }
 	| agentlist SHARE IDENT  { List.iter add_agent $1; add_private $3; List.iter (fun a -> add_agent a; Hashtbl.add (Hashtbl.find agent_table a) (Variable $3) (Variable $3)) $1 }
@@ -168,7 +187,8 @@ narration:
 			(* Build narration record *)
 			{
 				signatures = new_signature_table;
-				equations = List.rev eq;
+				equational_theory = List.rev eq;
+				equations = get_equations eq;
 				names = new_name_table;
 				agents = new_agent_table;
 				exchanges = List.rev ex

@@ -11,6 +11,6 @@ let () =
 		let narration = Parser.narration_dot Lexer.token lexbuf in
 		print_endline "---------------------------------";
 		Hashtbl.iter (fun _ k -> Knowledge.normalize_knowledge k narration.equations) narration.agents;
-		Checked_narration.print_translation narration;
+		Appliedpi.print_translation narration;
 		print_newline ()
 	done

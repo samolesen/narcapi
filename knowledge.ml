@@ -5,7 +5,7 @@ module StringMap = Map.Make(String)
 
 type check =
 	| Check of term * term
-	| Let of term * term
+	| Let of tuple * term
 
 
 let print_substitution substitution =
@@ -21,7 +21,7 @@ let string_of_checks checks =
 		(fun x a ->
 			match x with
 			| Check (left,right) -> "\n  [" ^ string_of_term left ^ " = " ^ string_of_term right ^ "]" ^ a
-			| Let (left,right) -> "\n  let " ^ string_of_term left ^ " = " ^ string_of_term right ^ a
+			| Let (left,right) -> "\n  let " ^ string_of_term (Tuple left) ^ " = " ^ string_of_term right ^ a
 			)
 		checks (if List.length checks > 0 then "\n" else "")
 	^"}"
@@ -60,7 +60,7 @@ let exist_substituted_parameter term substitution =
 let exist_nonsubstituted_parameter term substitution =
 	exist_parameter term (fun x -> not (StringMap.mem x substitution))
 
-let term_fit term (Equation (left,right)) =
+let term_fit term (left,right) =
 	let rec term_fit term = function
 		| Variable _ -> []
 		| (Function (_, es) | Tuple es) as left ->
@@ -79,15 +79,15 @@ let rec apply_substitution term substitution =
 	match term with
 	| Variable x -> (try StringMap.find x substitution with Not_found -> Tuple [])
 	| Function (_, es) | Tuple es ->
-		let untitled = List.map (fun e -> apply_substitution e substitution) es in
-		change_inner_terms term untitled
+		let substituted_terms = List.map (fun e -> apply_substitution e substitution) es in
+		change_inner_terms term substituted_terms
 
 let equation_instances term equations =
-	let untitled a (Equation (left,right)) =
+	let add_equation_instance a (left,right) =
 		match term_unification left (StringMap.empty) term with
 		| Some s when not (exist_nonsubstituted_parameter right s) -> apply_substitution right s :: a
 		| _ -> a in
-	List.fold_left untitled [term] equations
+	List.fold_left add_equation_instance [term] equations
 
 let rec can_synthesize_term knowledge equations term =
 	let subterm_syn = function
@@ -126,12 +126,12 @@ let satisfy_substitution term substitution knowledge equations =
 	satisfy_substitution [term] [] substitution
 
 let find_substitutions equation knowledge equations =
-	let Equation (eq_left, eq_right) = equation in
-	let untitled1 k _ a =
-		let untitled2 a s =
+	let (eq_left, eq_right) = equation in
+	let add_substitutions k _ a =
+		let add_satisfied_substitution a s =
 			satisfy_substitution eq_left s knowledge equations @ a in
-		List.fold_left untitled2 a (term_fit k equation) in
-	Hashtbl.fold untitled1 knowledge []
+		List.fold_left add_satisfied_substitution a (term_fit k equation) in
+	Hashtbl.fold add_substitutions knowledge []
 
 let rec synthesize knowledge equations term =
 	let sub_synthesis = function
@@ -159,7 +159,7 @@ let analyse_step knowledge equations =
 	let derive_from_equation res eq =
 		let substitutions = find_substitutions eq knowledge equations in
 		let create_representations res sub =
-			let Equation (eq_left, eq_right) = eq in
+			let (eq_left, eq_right) = eq in
 			let exp = apply_substitution eq_right sub in
 			let representations = synthesize knowledge equations (apply_substitution eq_left sub) in
 			assert (List.length representations > 0); (* We expect to find at least one representation for each substitution *)
@@ -179,7 +179,7 @@ let divide_tuples knowledge =
 			match k with
 			| Tuple es ->
 				let untitled = function
-				| Tuple _ as e -> get_some(divide_tuples e)
+				| Tuple _ as e -> get_some (divide_tuples e)
 				| e ->
 					if key=value then (Hashtbl.add knowledge e e; e)
 					else
@@ -189,7 +189,8 @@ let divide_tuples knowledge =
 			| _ -> None in
 		match divide_tuples key with
 		| None -> a
-		| Some x -> Hashtbl.remove knowledge key; Let (x,value) :: a in
+		| Some (Tuple x) -> Hashtbl.remove knowledge key; Let (x,value) :: a
+		| Some _ -> failwith "Invalid path" in
 	Hashtbl.fold divide_tuples knowledge []
 
 let rec term_variants equations term =
@@ -231,12 +232,12 @@ let analyse knowledge equations =
 		else analyse knowledge equations new_checks in
 	analyse knowledge equations []
 
-let print_analysis knowledge equations =
+let print_analysis knowledge equational_theory =
 	print_endline "Equations:";
-	print_equations equations;
+	print_equational_theory equational_theory;
 	print_endline "Old knowledge:";
 	print_knowledge knowledge;
-	let checks = analyse knowledge equations in
+	let checks = analyse knowledge (get_equations equational_theory) in
 	print_endline "New knowledge:";
 	print_knowledge knowledge;
 	print_endline "Checks:";
@@ -251,8 +252,6 @@ let print_analysis knowledge equations =
 let exchange knowledge_a knowledge_b term equations =
 	if can_synthesize_term knowledge_a equations term then (
 		let rep = (Parser.representation_name term) in
-		(* add_normalized_terms term rep knowledge_b equations *)
 		Hashtbl.add knowledge_b term rep; rep
 	)
 	else failwith ("ERROR: Cannot synthesize "^string_of_term term)
-	(* Should the function return the knowledge piece? *)

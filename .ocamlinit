@@ -4,5 +4,5 @@
 #mod_use "parser.ml";;
 #mod_use "lexer.ml";;
 #mod_use "knowledge.ml";;
-#mod_use "checked_narration.ml";;
+#mod_use "appliedpi.ml";;
 #use "repl.ml";;

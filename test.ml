@@ -25,25 +25,25 @@ let knowledge =
 	knowledge_table
 
 let () =
-	let eq = Equation (
+	let eq = (
 		Function ("f",[(Function ("g",[Variable "x";Variable "y"]));Function ("h",[Variable "z"])]),
 		Variable "x") in
 	Knowledge.print_analysis knowledge [eq]
 
 let () =
-	let eq = Equation (
+	let eq = (
 		Function ("o",[(Function ("h",[Variable "x"]));Variable "y";(Function ("g",[Variable "x";Variable "y"]))]),
 		Variable "x") in
 	Knowledge.print_analysis knowledge [eq]
 
 let () =
-	let eq = Equation (
+	let eq = (
 		Function ("h",[(Function ("h",[Variable "x"]))]),
 		Variable "x") in
 	Knowledge.print_analysis knowledge [eq]
 
 let () =
-	let eq = Equation (
+	let eq = (
 		Function ("dec",[(Function ("enc",[Variable "x";Variable "y"]));Variable "y"]),
 		Variable "x") in
 	Knowledge.print_analysis knowledge [eq]
@@ -65,7 +65,7 @@ let knowledge =
 	knowledge_table
 
 let () =
-	let eq = Equation (
+	let eq = (
 		Function ("f",[(Function ("h",[Variable "x"]));Variable "y";Variable "z";(Function ("g",[Variable "x";Variable "y"]))]),
 		Variable "x") in
 		Knowledge.print_analysis knowledge [eq]
@@ -87,7 +87,7 @@ let knowledge =
 		knowledge_table
 
 let () =
-	let eq = Equation (
+	let eq = (
 		Function ("f",[Function ("f",[Variable "x"])]),
 		Variable "x") in
 		Knowledge.print_analysis knowledge [eq]
@@ -107,7 +107,7 @@ let knowledge =
 		knowledge_table
 
 let () =
-	let eq = Equation (
+	let eq = (
 		Function ("g",[Function ("f",[Variable "x";Variable "y"]); Function ("f",[Variable "x";Variable "z"]); Function ("f",[Variable "y";Variable "z"])]),
 		Variable "y") in
 		Knowledge.print_analysis knowledge [eq]
@@ -131,7 +131,7 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("f",[Function ("f",[Variable "x";Variable "y"]);Function ("h",[Variable "y"])]),
 				Variable "x")
 		] in
@@ -153,10 +153,10 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("f",[Variable "x"]),
 				Variable "x");
-			Equation (
+			(
 				Function ("g",[Variable "x"]),
 				Variable "x");
 		] in
@@ -184,10 +184,10 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("dec",[Function ("enc",[Variable "x"; Variable "y"]); Variable "y"]),
 				Variable "x");
-			Equation (
+			(
 				Function ("g",[Variable "x"]),
 				Variable "x");
 		] in
@@ -207,11 +207,11 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("dec",[Function ("enc",[Variable "x";Variable "y";Variable "z"]);Variable "y"]),
 				Variable "x")
 			;
-			Equation (
+			(
 				Function ("enc",[Variable "x";Variable "y";Variable "z"]),
 				Variable "y")
 		] in
@@ -233,7 +233,7 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("dec",[Function ("enc",[Variable "x";Variable "y";Variable "z"]);Variable "y"]),
 				Variable "x")
 			;
@@ -255,7 +255,7 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("f",[Function ("g",[Variable "x";Variable "y"]);Variable "y"]),
 				Variable "x")
 			;
@@ -283,7 +283,7 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("f",[Function ("g",[Variable "x";Variable "y"]);Function ("h",[Variable "y";Variable "z"]);Variable "z"]),
 				Variable "x")
 			;
@@ -303,11 +303,11 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("f->",[Function ("g->",[Variable "x"])]),
 				Variable "x")
 			;
-			Equation (
+			(
 				Function ("g->",[Variable "x"]),
 				Function ("h->",[Variable "x"]))
 		] in
@@ -330,11 +330,11 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("dec",[Function ("enc",[Variable "x";Variable "y"]);Variable "y"]),
 				Variable "x")
 			;
-			Equation (
+			(
 				Function ("dhe",[Function ("dhg",[Variable "x"]);Variable "y"]),
 				Function ("dhe",[Function ("dhg",[Variable "y"]);Variable "x"]))
 		] in
@@ -355,11 +355,11 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("dec",[Function ("enc",[Variable "x";Variable "y"]);Variable "y"]),
 				Variable "x")
 			;
-			Equation (
+			(
 				Function ("f",[Variable "x";Variable "y"]),
 				Function ("f",[Variable "y";Variable "x"]))
 		] in
@@ -367,9 +367,9 @@ let () =
 		Knowledge.print_analysis knowledge equations
 
 let () =
-	let asdf = Knowledge.normalize_term (Function ("f",[Function ("h",[Function ("f",[Variable "x";Variable "y"])]);Variable "y"])) [Equation (Function ("f",[Variable "x";Variable "y"]), Variable "x")] in
+	let asdf = Knowledge.normalize_term (Function ("f",[Function ("h",[Function ("f",[Variable "x";Variable "y"])]);Variable "y"])) [(Function ("f",[Variable "x";Variable "y"]), Variable "x")] in
 	List.iter (fun x -> print_endline (string_of_term x)) asdf;print_newline ();
-	let asdf = Knowledge.normalize_term (Function ("h",[Function ("h",[Function ("f",[Variable "x";Variable "y"])])])) [Equation (Function ("f",[Variable "x";Variable "y"]), Variable "x")] in
+	let asdf = Knowledge.normalize_term (Function ("h",[Function ("h",[Function ("f",[Variable "x";Variable "y"])])])) [(Function ("f",[Variable "x";Variable "y"]), Variable "x")] in
 	List.iter (fun x -> print_endline (string_of_term x)) asdf
 
 
@@ -400,7 +400,7 @@ let knowledge =
 let () =
 	let equations = 
 		[
-			Equation (
+			(
 				Function ("f",[Variable "x"]),
 				Variable "x")
 		] in
