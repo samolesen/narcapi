@@ -56,12 +56,6 @@ let add_agent a =
 		with Not_found -> () end;
 		Hashtbl.add agent_table a (Hashtbl.create 10); add_public a
 	| Agent | Both -> ()
-
-let representation_n = ref 0
-let representation_name expectation =
-	match expectation with
-	| Variable n -> incr representation_n; Variable (n ^ "_" ^ string_of_int (!representation_n)) (* TODO: check whether n already exists *)
-	| _ -> incr representation_n; Variable ("x_"^string_of_int (!representation_n))
 %}
 
 %token <string> IDENT

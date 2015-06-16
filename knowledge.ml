@@ -183,7 +183,7 @@ let divide_tuples knowledge =
 				| e ->
 					if key=value then (Hashtbl.add knowledge e e; e)
 					else
-						let subterm_rep = (Parser.representation_name e) in
+						let subterm_rep = (create_representation_name e) in
 						(Hashtbl.add knowledge e subterm_rep; subterm_rep) in
 				Some (Tuple (List.map untitled es))
 			| _ -> None in
@@ -251,7 +251,7 @@ let print_analysis knowledge equational_theory =
 
 let exchange knowledge_a knowledge_b term equations =
 	if can_synthesize_term knowledge_a equations term then (
-		let rep = (Parser.representation_name term) in
+		let rep = (create_representation_name term) in
 		Hashtbl.add knowledge_b term rep; rep
 	)
 	else failwith ("ERROR: Cannot synthesize "^string_of_term term)

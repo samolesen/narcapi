@@ -71,6 +71,12 @@ let rec term_function_fold f a = function
 let get_equations equational_theory =
 	List.fold_left (fun a -> function Equation (e_l,e_r) -> (e_l,e_r)::a | _ -> a) [] equational_theory
 
+let representation_n = ref 0
+let create_representation_name expectation =
+	match expectation with
+	| Variable n -> incr representation_n; Variable (n ^ "_" ^ string_of_int (!representation_n)) (* TODO: check whether n already exists *)
+	| _ -> incr representation_n; Variable ("x_"^string_of_int (!representation_n))
+
 (* let add_distinct knowledge_table duplicate_table k v =
 	if Hashtbl.mem knowledge_table k then (
 		if Hashtbl.find knowledge_table k <> v
