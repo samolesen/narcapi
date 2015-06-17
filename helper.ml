@@ -28,3 +28,7 @@ let product_of_list listlist =
 		let add_element_to_product ret e = List.fold_left (fun a x -> (e::x)::a) ret result in
 		List.fold_left add_element_to_product [] elist in
 	List.fold_right add_list_to_product listlist [[]]
+
+let input_error message =
+	print_endline ("Error: " ^ message);
+	exit 2

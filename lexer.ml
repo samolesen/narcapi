@@ -1,5 +1,6 @@
 # 1 "lexer.mll"
  
+	open Helper
 	open Parser
 
 	let keyword_list =
@@ -17,7 +18,7 @@
 		List.iter add_to_table keyword_list;
 		table
 
-# 21 "lexer.ml"
+# 22 "lexer.ml"
 let __ocaml_lex_tables = {
   Lexing.lex_base = 
    "\000\000\241\255\084\000\159\000\244\255\000\000\246\255\247\255\
@@ -158,107 +159,104 @@ let rec token lexbuf =
 and __ocaml_lex_token_rec lexbuf __ocaml_lex_state =
   match Lexing.engine __ocaml_lex_tables __ocaml_lex_state lexbuf with
       | 0 ->
-# 21 "lexer.mll"
+# 22 "lexer.mll"
                   ( token lexbuf )
-# 164 "lexer.ml"
+# 165 "lexer.ml"
 
   | 1 ->
-# 22 "lexer.mll"
+# 23 "lexer.mll"
                   ( SEPARATOR )
-# 169 "lexer.ml"
+# 170 "lexer.ml"
 
   | 2 ->
-# 23 "lexer.mll"
+# 24 "lexer.mll"
                   ( NEWLINE )
-# 174 "lexer.ml"
+# 175 "lexer.ml"
 
   | 3 ->
-# 24 "lexer.mll"
+# 25 "lexer.mll"
                   ( DOT )
-# 179 "lexer.ml"
+# 180 "lexer.ml"
 
   | 4 ->
-# 25 "lexer.mll"
+# 26 "lexer.mll"
                   ( SLASH )
-# 184 "lexer.ml"
+# 185 "lexer.ml"
 
   | 5 ->
-# 26 "lexer.mll"
+# 27 "lexer.mll"
                   ( LPAREN )
-# 189 "lexer.ml"
+# 190 "lexer.ml"
 
   | 6 ->
-# 27 "lexer.mll"
+# 28 "lexer.mll"
                   ( RPAREN )
-# 194 "lexer.ml"
+# 195 "lexer.ml"
 
   | 7 ->
-# 28 "lexer.mll"
+# 29 "lexer.mll"
                   ( COMMA )
-# 199 "lexer.ml"
+# 200 "lexer.ml"
 
   | 8 ->
-# 29 "lexer.mll"
+# 30 "lexer.mll"
                   ( EQUAL )
-# 204 "lexer.ml"
+# 205 "lexer.ml"
 
   | 9 ->
-# 30 "lexer.mll"
+# 31 "lexer.mll"
                   ( COLON )
-# 209 "lexer.ml"
+# 210 "lexer.ml"
 
   | 10 ->
-# 31 "lexer.mll"
+# 32 "lexer.mll"
                   ( ARROW )
-# 214 "lexer.ml"
+# 215 "lexer.ml"
 
   | 11 ->
-# 32 "lexer.mll"
+# 33 "lexer.mll"
                   ( EOF )
-# 219 "lexer.ml"
+# 220 "lexer.ml"
 
   | 12 ->
 let
-# 33 "lexer.mll"
+# 34 "lexer.mll"
                    lexeme
-# 225 "lexer.ml"
+# 226 "lexer.ml"
 = Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
-# 33 "lexer.mll"
+# 34 "lexer.mll"
                            ( INTEGER(int_of_string lexeme) )
-# 229 "lexer.ml"
+# 230 "lexer.ml"
 
   | 13 ->
 let
-# 34 "lexer.mll"
-                                                                                                              lexeme
-# 235 "lexer.ml"
-= Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
 # 35 "lexer.mll"
+                                                                                                              lexeme
+# 236 "lexer.ml"
+= Lexing.sub_lexeme lexbuf lexbuf.Lexing.lex_start_pos lexbuf.Lexing.lex_curr_pos in
+# 36 "lexer.mll"
   (
 			try Hashtbl.find keyword_table (String.lowercase lexeme)
 			with Not_found -> IDENT(lexeme) 
 		)
-# 242 "lexer.ml"
+# 243 "lexer.ml"
 
   | 14 ->
 let
-# 39 "lexer.mll"
-        symbol
-# 248 "lexer.ml"
-= Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
 # 40 "lexer.mll"
+        symbol
+# 249 "lexer.ml"
+= Lexing.sub_lexeme_char lexbuf lexbuf.Lexing.lex_start_pos in
+# 41 "lexer.mll"
   (
-			let mess = ("Illegal character \"" ^ (String.make 1 symbol) ^ "\"") in
-				print_char symbol; 
-				let loc_start = Lexing.lexeme_start_p lexbuf in
-				let loc_end = Lexing.lexeme_end_p lexbuf in
-				Printf.printf "File \"%s\", line %d, character %d - line %d, character %d:\nError: %s\n"
+			let loc_start = Lexing.lexeme_start_p lexbuf in
+			input_error (Printf.sprintf "Illegal character \"%s\" in file \"%s\", at line %d, character %d."
+				(String.make 1 symbol)
 				loc_start.Lexing.pos_fname
-				loc_start.Lexing.pos_lnum (loc_start.Lexing.pos_cnum - loc_start.Lexing.pos_bol +1)
-				loc_end.Lexing.pos_lnum (loc_end.Lexing.pos_cnum - loc_end.Lexing.pos_bol+1)
-				mess; token lexbuf
+				loc_start.Lexing.pos_lnum
+				(loc_start.Lexing.pos_cnum - loc_start.Lexing.pos_bol +1))
 		)
-# 262 "lexer.ml"
+# 260 "lexer.ml"
 
   | __ocaml_lex_state -> lexbuf.Lexing.refill_buff lexbuf; __ocaml_lex_token_rec lexbuf __ocaml_lex_state
 

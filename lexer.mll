@@ -1,4 +1,5 @@
 {
+	open Helper
 	open Parser
 
 	let keyword_list =
@@ -38,13 +39,10 @@ rule token = parse
 		}
 	| _ as symbol
 		{
-			let mess = ("Illegal character \"" ^ (String.make 1 symbol) ^ "\"") in
-				print_char symbol; 
-				let loc_start = Lexing.lexeme_start_p lexbuf in
-				let loc_end = Lexing.lexeme_end_p lexbuf in
-				Printf.printf "File \"%s\", line %d, character %d - line %d, character %d:\nError: %s\n"
+			let loc_start = Lexing.lexeme_start_p lexbuf in
+			input_error (Printf.sprintf "Illegal character \"%s\" in file \"%s\", at line %d, character %d."
+				(String.make 1 symbol)
 				loc_start.Lexing.pos_fname
-				loc_start.Lexing.pos_lnum (loc_start.Lexing.pos_cnum - loc_start.Lexing.pos_bol +1)
-				loc_end.Lexing.pos_lnum (loc_end.Lexing.pos_cnum - loc_end.Lexing.pos_bol+1)
-				mess; token lexbuf
+				loc_start.Lexing.pos_lnum
+				(loc_start.Lexing.pos_cnum - loc_start.Lexing.pos_bol +1))
 		}
