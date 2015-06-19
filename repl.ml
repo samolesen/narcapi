@@ -7,7 +7,8 @@ let () =
 			let s = read_line () in
 			if String.contains s '.' then str ^ s
 			else prompt_string (str ^ s ^ "\n") in
-		let lexbuf = Lexing.from_string (prompt_string "") in
+		let str = prompt_string "" in
+		let lexbuf = Lexing.from_string str in
 		let narration = Parser.narration_dot Lexer.token lexbuf in
 		print_endline "---------------------------------";
 		Hashtbl.iter (fun _ k -> Knowledge.normalize_knowledge k narration.equations) narration.agents;

@@ -19,3 +19,5 @@ type token =
 
 val narration_dot :
   (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Tree.narration
+val narration :
+  (Lexing.lexbuf  -> token) -> Lexing.lexbuf -> Tree.narration

@@ -1,4 +1,5 @@
 %{
+open Helper
 open Tree
 
 let signature_table = Hashtbl.create 10
@@ -7,16 +8,18 @@ let agent_table = Hashtbl.create 10
 
 let add_function ?(warning=false) func arity =
 	match Hashtbl.mem signature_table func with
-	| false -> if warning then print_endline ("WARNING: Function \""^func^"\" is not explicitly defined."); Hashtbl.add signature_table func arity
+	| false ->
+		if warning then raise_warning ("Missing declaration of function \""^func^"\" has been added.");
+		Hashtbl.add signature_table func arity
 	| true -> if Hashtbl.find signature_table func <> arity then
-		print_endline ("ERROR: Function \""^func^"\" is used with conflicting numbers of arguments.")
+		raise_error ("Function \""^func^"\" is used with conflicting numbers of arguments.")
 
 
 let check_function func arity =
 	try 
 		if Hashtbl.find signature_table func <> arity then
-			print_endline ("ERROR: Function \""^func^"\" is used with conflicting numbers of arguments.")
-	with Not_found -> print_endline ("ERROR: Function \""^func^"\" is not defined.")
+			raise_error ("Function \""^func^"\" is used with conflicting numbers of arguments.")
+	with Not_found -> raise_error ("Function \""^func^"\" is not declared.")
 
 type table_search_result =
 	| Both
@@ -45,14 +48,14 @@ let add_public e =
 let add_generated e a =
 	match exist_in_tables e with
 	| None -> Hashtbl.add name_table e (Generated a)
-	| Name -> if Hashtbl.find name_table e = Private || Hashtbl.find name_table e = Public then failwith (e ^ " cannot be generated due to previous declaration.")
-	| Agent | Both -> failwith (e ^ " cannot be generated due to being an agent.")
+	| Name -> if Hashtbl.find name_table e = Private || Hashtbl.find name_table e = Public then raise_error (e ^ " cannot be generated due to previous declaration.")
+	| Agent | Both -> raise_error (e ^ " cannot be generated due to being an agent.")
 
 let add_agent a =
 	match exist_in_tables a with
 	| None | Name ->
 		begin try
-			if Hashtbl.find name_table a <> Private && Hashtbl.find name_table a <> Public then failwith (a ^ " cannot be an agent due to being generated.")
+			if Hashtbl.find name_table a <> Private && Hashtbl.find name_table a <> Public then raise_error (a ^ " cannot be an agent due to being generated.")
 		with Not_found -> () end;
 		Hashtbl.add agent_table a (Hashtbl.create 10); add_public a
 	| Agent | Both -> ()
@@ -75,7 +78,9 @@ let add_agent a =
 %token DOT
 %token EOF
 %start narration_dot
+%start narration
 %type <Tree.narration> narration_dot
+%type <Tree.narration> narration
 
 %%
 
@@ -146,7 +151,8 @@ exchange:
 			term_variable_iter
 				(fun x ->
 					if not (Hashtbl.mem name_table x) then (* Replace with check in $1's knowledge *)
-						print_endline ("ERROR: \"" ^ x ^ "\" is not a name or an agent."))
+						raise_error ("\"" ^ x ^ "\" is not a name or an agent.")
+				)
 				$5;
 			term_function_iter check_function $5;
 			Exchange ($1, $3, $5) }

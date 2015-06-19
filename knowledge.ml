@@ -178,14 +178,14 @@ let divide_tuples knowledge =
 		let rec divide_tuples k =
 			match k with
 			| Tuple es ->
-				let untitled = function
+				let divide_inner_tuples = function
 				| Tuple _ as e -> get_some (divide_tuples e)
 				| e ->
 					if key=value then (Hashtbl.add knowledge e e; e)
 					else
 						let subterm_rep = (create_representation_name e) in
 						(Hashtbl.add knowledge e subterm_rep; subterm_rep) in
-				Some (Tuple (List.map untitled es))
+				Some (Tuple (List.map divide_inner_tuples es))
 			| _ -> None in
 		match divide_tuples key with
 		| None -> a
@@ -249,9 +249,9 @@ let print_analysis knowledge equational_theory =
 
 
 
-let exchange knowledge_a knowledge_b term equations =
+let exchange sender knowledge_a knowledge_b term equations =
 	if can_synthesize_term knowledge_a equations term then (
 		let rep = (create_representation_name term) in
 		Hashtbl.add knowledge_b term rep; rep
 	)
-	else failwith ("ERROR: Cannot synthesize "^string_of_term term)
+	else raise_error ("\"" ^ sender ^ "\" cannot synthesize the term " ^ string_of_term term)

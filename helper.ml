@@ -29,6 +29,11 @@ let product_of_list listlist =
 		List.fold_left add_element_to_product [] elist in
 	List.fold_right add_list_to_product listlist [[]]
 
-let input_error message =
+let raised_warnings = Queue.create ()
+
+let raise_warning message =
+	Queue.add ("Warning: " ^ message) raised_warnings
+
+let raise_error message =
 	print_endline ("Error: " ^ message);
 	exit 2

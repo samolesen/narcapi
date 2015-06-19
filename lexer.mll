@@ -40,7 +40,7 @@ rule token = parse
 	| _ as symbol
 		{
 			let loc_start = Lexing.lexeme_start_p lexbuf in
-			input_error (Printf.sprintf "Illegal character \"%s\" in file \"%s\", at line %d, character %d."
+			raise_error (Printf.sprintf "Illegal character \"%s\" in file \"%s\", at line %d, character %d."
 				(String.make 1 symbol)
 				loc_start.Lexing.pos_fname
 				loc_start.Lexing.pos_lnum
