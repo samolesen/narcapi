@@ -1,0 +1,12 @@
+dec(enc(x,y,z),y) = x
+exp(exp(g(),x),y) = exp(exp(g(),y),x)
+
+A,B know (A,B)
+A,B share m
+A generates n
+A generates kA
+B generates kB
+
+A->B: exp(g(),kA)
+B->A: exp(g(),kB)
+A->B: enc(m, exp(exp(g(),kB),kA), n)

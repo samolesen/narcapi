@@ -23,4 +23,11 @@ let () =
 		let narration = parse filename in
 		Appliedpi.print_translation narration
 	else
-		print_endline ("Usage: " ^ Sys.argv.(0) ^ " PATH\nWhere PATH is the path/filename of an equational protocol narration.")
+	(
+		print_endline ("Usage: " ^ Sys.argv.(0) ^ " INPUTPATH [> OUTPUTPATH]");
+		print_newline ();
+		print_endline "INPUTPATH is the path/filename of an equational protocol narration";
+		print_endline "OUTPUTPATH is the path/filename for the resulting applied pi process.";
+		print_newline ();
+		print_endline ("Example: " ^ Sys.argv.(0) ^ " examples/diffiehellman.epn > examples/diffiehellman.pv")
+	)
