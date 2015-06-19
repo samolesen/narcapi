@@ -31,7 +31,7 @@ equation dec(enc(x, y, z), y) = x.
 let B =
   new nB;
   in(B, x_3);
-  if dec(x_3, k) = dec(x_3, k) then    <- Well-formed test (Can B decrypt the message sent by A?)
+  if dec(x_3, k) = dec(x_3, k) then    <- Well-formed test (Can B decrypt A's message?)
   out(A, enc((dec(x_3, k), dec(x_3, k)), k, nB)); 0.
 
 let A =
