@@ -1,0 +1,8 @@
+dec(enc(x,y),y) = x
+
+A,B know (A,B)
+A,B share k_AB
+A generates n
+
+A->B: n
+B->A: enc(n, k_AB)

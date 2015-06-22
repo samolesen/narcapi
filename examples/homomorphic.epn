@@ -1,0 +1,16 @@
+dec(enc(x, y), y) = x
+add/2
+penc(enc(x, y), enc(p, q)) = enc((x,p), add(y,q))
+
+A,B,C know (A,B,C)
+
+A generates mA
+private kA; A knows kA
+
+B generates mB
+private kB; B knows kB
+
+C knows add(kA,kB)
+
+A->B: enc(mA, kA)
+B->C: penc(enc(mA, kA), enc(mB, kB))
