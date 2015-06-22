@@ -20,6 +20,13 @@ let translate narration =
 	let equational_theory = 
 		"(* Equational theory *)\n" ^
 		string_of_equations narration.equational_theory ^ "\n\n" in
+	let queries =
+		let add_global_restricted_name k v a =
+			match v with
+			| Private | Generated _ -> a ^ "\nquery attacker : " ^ k ^ "."
+			| _ -> a in
+		"(* Queries *)" ^
+		Hashtbl.fold add_global_restricted_name narration.names "" ^ "\n\n" in
 	let agent_processes = Hashtbl.create 10 in
 	let add_process_actions = function
 		| Exchange (a_agent, b_agent, message) ->
@@ -41,8 +48,8 @@ let translate narration =
 					| Generated ag when agent = ag -> a ^ "\n  new " ^ k ^ ";"
 					| _ -> a in
 				Hashtbl.fold add_generated_name narration.names "" in
-			"let " ^ agent ^ " =" ^ generated_names ^ process ^ " 0." in
-		"(* Protocol *)\n" ^ String.concat "\n\n" (list_of_table build_agent_process agent_processes) in
+			"\nlet " ^ agent ^ " =" ^ generated_names ^ process ^ " 0.\n" in
+		"(* Protocol *)" ^ String.concat "" (list_of_table build_agent_process agent_processes) in
 	let global_process =
 		let global_restricted_names =
 			let add_global_restricted_name k v a =
@@ -51,11 +58,11 @@ let translate narration =
 				| _ -> a in
 			Hashtbl.fold add_global_restricted_name narration.names "" in
 		let parallel_composition = String.concat " | " (list_of_table (fun k v -> k) agent_processes) in
-		"\n\nprocess\n" ^ global_restricted_names ^ "  !(" ^ parallel_composition ^ ")" in
+		"\nprocess\n" ^ global_restricted_names ^ "  !(" ^ parallel_composition ^ ")" in
 	let warnings =
 		let rec get_warnings acc = try get_warnings (acc ^ "  " ^ Queue.take raised_warnings ^ "\n") with Queue.Empty -> acc in
 		if Queue.length raised_warnings = 0 then ""
 		else "(*\n" ^ get_warnings "" ^ "*)\n\n" in
-	warnings ^ equational_theory ^ agent_projections ^ global_process
+	warnings ^ equational_theory ^ queries ^ agent_projections ^ global_process
 
 let print_translation narration = print_string (translate narration)
